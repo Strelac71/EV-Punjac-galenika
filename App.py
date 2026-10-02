@@ -136,9 +136,10 @@ punjac_html = f"""
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
 
+# PRIKAZ LOGIKE U ZAVISNOSTI OD TOGA DA LI JE PUNJAČ SLOBODAN ILI ZAUZET
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
-    ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed")
+    ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="checkin_ime")
     
     if st.button("Check-in", use_container_width=True):
         if ime_korisnika.strip() != "":
@@ -174,7 +175,7 @@ else:
         
         if ukupno_sekundi >= 3600:
             st.error("⏰ Isteklo je sat vremena punjenja!")
-    
+            
     prikazi_tajmer()
         
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
@@ -205,7 +206,6 @@ else:
     imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])
     st.markdown(f"<div style='padding: 6px 10px; background: #1a1a1e; border: 1px dashed #2a2a30; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #e2e8f0; width: 90%; margin-left: auto; margin-right: auto;'>{imena_u_redu}</div>", unsafe_allow_html=True)
 
+# DODAVANJE U RED (Potpuno ravna struktura bez uvlačenja)
 if not db["slobodan"]:
     st.write("")
-    ime_za_listu = st.text_input("Tvoje ime za listu", placeholder="Unesi ime za red...", key="red_ime", label_visibility="collapsed")
-    if st.button("+ Pridruži se redu", use_container_width=True):

@@ -2,6 +2,7 @@ import streamlit as st
 import datetime
 import json
 import os
+import time
 
 # Podešavanje stranice za mobilne telefone
 st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="centered")
@@ -43,6 +44,7 @@ if db["slobodan"]:
 else:
     status_tekst, status_boja, status_bg = f"Zauzet ({db['korisnik']})", "#ef4444", "#fef2f2"
 
+# Promenjena snaga na 22kW
 punjac_html = f"""
 <div style="border: 2px solid #22c55e; border-radius: 12px; padding: 15px; background-color: white; margin-bottom: 10px;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -50,7 +52,7 @@ punjac_html = f"""
         <span style="background-color: {status_bg}; color: {status_boja}; border: 1px solid {status_boja}33; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px;">{status_tekst}</span>
     </div>
     <p style="margin: 8px 0 4px 0; color: #64748b; font-size: 14px;">📍 Galenika, Zemun</p>
-    <p style="margin: 0; color: #64748b; font-size: 14px;">🔋 22kw DC</p>
+    <p style="margin: 0; color: #64748b; font-size: 14px;">🔋 22kW</p>
 </div>
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
@@ -69,10 +71,23 @@ if db["slobodan"]:
         else:
             st.warning("Molimo vas unesite ime pre čekiranja.")
 else:
+    # --- AUTOMATSKI BROJAČ KOJI SE SAM OSVEŽAVA ---
     proteklo = datetime.datetime.now() - db["vreme_pocetka"]
-    minuti = int(proteklo.total_seconds() // 60)
-    st.info(f"Punjač zauzima: **{db['korisnik']}** (puni se već {minuti} min).")
+    ukupno_sekundi = int(proteklo.total_seconds())
+    sati = ukupno_sekundi // 3600
+    minuti = (ukupno_sekundi % 3600) // 60
     
+    if sati > 0:
+        vreme_prikaz = f"{sati}h {minuti}min"
+    else:
+        vreme_prikaz = f"{minuti} min"
+        
+    st.info(f"Punjač zauzima: **{db['korisnik']}** (puni se već **{vreme_prikaz}**).")
+    
+    # Dugme koje forsira osvežavanje brojača na ekranu
+    if st.button("🔄 Osveži vreme", use_container_width=True):
+        st.rerun()
+        
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)

@@ -2,7 +2,6 @@ import streamlit as st
 import datetime
 import json
 import os
-import time
 
 # Podešavanje stranice za mobilne telefone
 st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="centered")
@@ -44,7 +43,7 @@ if db["slobodan"]:
 else:
     status_tekst, status_boja, status_bg = f"Zauzet ({db['korisnik']})", "#ef4444", "#fef2f2"
 
-# Promenjena snaga na 22kW
+# Snaga 22kW
 punjac_html = f"""
 <div style="border: 2px solid #22c55e; border-radius: 12px; padding: 15px; background-color: white; margin-bottom: 10px;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -71,7 +70,7 @@ if db["slobodan"]:
         else:
             st.warning("Molimo vas unesite ime pre čekiranja.")
 else:
-    # --- AUTOMATSKI BROJAČ KOJI SE SAM OSVEŽAVA ---
+    # Računanje vremena punjenja
     proteklo = datetime.datetime.now() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
     sati = ukupno_sekundi // 3600
@@ -84,9 +83,17 @@ else:
         
     st.info(f"Punjač zauzima: **{db['korisnik']}** (puni se već **{vreme_prikaz}**).")
     
-    # Dugme koje forsira osvežavanje brojača na ekranu
-    if st.button("🔄 Osveži vreme", use_container_width=True):
-        st.rerun()
+    # PAMETNO AUTOMATSKO OSVEŽAVANJE SVAKIH 30 SEKUNDI
+    st.html("""
+        <script>
+            if (!window.ev_timer_set) {
+                window.ev_timer_set = True;
+                setInterval(function() {
+                    window.parent.postMessage({type: 'streamlit:render'}, '*');
+                }, 30000);
+            }
+        </script>
+    """)
         
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:

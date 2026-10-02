@@ -2,7 +2,6 @@ import streamlit as st
 import datetime
 import json
 import os
-from zoneinfo import ZoneInfo
 
 # Podešavanje stranice za mobilne telefone
 st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="centered")
@@ -10,8 +9,9 @@ st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="
 # Lokacija fajla koji glumi bazu podataka
 FAJL_BAZE = "baza_stanja.json"
 
-# Definisana vremenska zona za Srbiju
-VREMENSKA_ZONA = ZoneInfo("Europe/Belgrade")
+def nase_trenutno_vreme():
+    # Serversko UTC vreme pomeramo za +2 sata (naša vremenska zona)
+    return datetime.datetime.utcnow() + datetime.timedelta(hours=2)
 
 def ucitaj_bazu():
     if os.path.exists(FAJL_BAZE):
@@ -19,8 +19,12 @@ def ucitaj_bazu():
             with open(FAJL_BAZE, "r") as f:
                 d = json.load(f)
                 if d.get("vreme_pocetka"):
-                    # Učitavamo vreme i obavezno mu dodeljujemo beogradsku vremensku zonu
-                    d["vreme_pocetka"] = datetime.datetime.fromisoformat(d["vreme_pocetka"]).astimezone(VREMENSKA_ZONA)
+                    # Bezbedno učitavanje bez obzira na stari format
+                    try:
+                        d["vreme_pocetka"] = datetime.datetime.fromisoformat(d["vreme_pocetka"])
+                    except:
+                        # Ako je vreme oštećeno ili u čudnom formatu, resetujemo ga na trenutno
+                        d["vreme_pocetka"] = nase_trenutno_vreme()
                 return d
         except:
             pass
@@ -29,7 +33,9 @@ def ucitaj_bazu():
 def sacuvaj_bazu(d):
     kopija = d.copy()
     if kopija.get("vreme_pocetka"):
-        kopija["vreme_pocetka"] = kopija["vreme_pocetka"].isoformat()
+        # Čuvamo vreme u čistom formatu bez ikakvih sufiksa zona koji prave greške
+        if isinstance(kopija["vreme_pocetka"], datetime.datetime):
+            kopija["vreme_pocetka"] = kopija["vreme_pocetka"].replace(tzinfo=None).isoformat()
     with open(FAJL_BAZE, "w") as f:
         json.dump(kopija, f)
 
@@ -42,6 +48,10 @@ st.markdown("<p style='text-align: center; color: #64748b; font-size: 18px; marg
 st.markdown("<p style='text-align: center; color: #22c55e; font-weight: bold; margin-top: -10px;'>✓ Online</p>", unsafe_allow_html=True)
 
 db = st.session_state.db
+
+# Popravka u letu ako je vreme povuklo zonu iz prošlog koda
+if db["vreme_pocetka"] and hasattr(db["vreme_pocetka"], "tzinfo") and db["vreme_pocetka"].tzinfo is not None:
+    db["vreme_pocetka"] = db["vreme_pocetka"].replace(tzinfo=None)
 
 if db["slobodan"]:
     status_tekst, status_boja, status_bg = "Slobodan", "#22c55e", "#f0fdf4"
@@ -69,8 +79,7 @@ if db["slobodan"]:
         if ime_korisnika.strip() != "":
             db["slobodan"] = False
             db["korisnik"] = ime_korisnika
-            # Uzimamo trenutno vreme u Srbiji
-            db["vreme_pocetka"] = datetime.datetime.now(VREMENSKA_ZONA)
+            db["vreme_pocetka"] = nase_trenutno_vreme()
             sacuvaj_bazu(db)
             st.rerun()
         else:
@@ -79,11 +88,11 @@ else:
     # Izvlačenje tačnog vremena kada se korisnik zakačio (Format npr. 14:32)
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     
-    # Računanje vremena punjenja uživo sa tačnom vremenskom zonom
-    proteklo = datetime.datetime.now(VREMENSKA_ZONA) - db["vreme_pocetka"]
+    # Računanje vremena punjenja uživo
+    proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
-    sati = ukupno_sekundi // 3600
-    minuti = (ukupno_sekundi % 3600) // 60
+    sati = max(0, ukupno_sekundi // 3600)
+    minuti = max(0, (ukupno_sekundi % 3600) // 60)
     
     if sati > 0:
         vreme_prikaz = f"{sati}h {minuti}min"
@@ -108,8 +117,7 @@ else:
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)
-            # Sledeći korisnik dobija tačno vreme u Srbiji
-            db["vreme_pocetka"] = datetime.datetime.now(VREMENSKA_ZONA)
+            db["vreme_pocetka"] = nase_trenutno_vreme()
         else:
             db["slobodan"] = True
             db["korisnik"] = ""

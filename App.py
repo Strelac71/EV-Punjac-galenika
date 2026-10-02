@@ -70,7 +70,10 @@ if db["slobodan"]:
         else:
             st.warning("Molimo vas unesite ime pre čekiranja.")
 else:
-    # Računanje vremena punjenja
+    # Izvlačenje tačnog vremena kada se korisnik zakačio (Format npr. 14:32)
+    vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
+    
+    # Računanje vremena punjenja uživo
     proteklo = datetime.datetime.now() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
     sati = ukupno_sekundi // 3600
@@ -81,13 +84,14 @@ else:
     else:
         vreme_prikaz = f"{minuti} min"
         
-    st.info(f"Punjač zauzima: **{db['korisnik']}** (puni se već **{vreme_prikaz}**).")
+    # Prikaz i vremena kačenja i dužine punjenja
+    st.info(f"⚡ Zakačio/la se: **{db['korisnik']}** u **{vreme_kacenja}h**\n\n⏱️ Puni se već: **{vreme_prikaz}**")
     
-    # PAMETNO AUTOMATSKO OSVEŽAVANJE SVAKIH 30 SEKUNDI
+    # Automatsko osvežavanje ekrana na 30 sekundi
     st.html("""
         <script>
             if (!window.ev_timer_set) {
-                window.ev_timer_set = True;
+                window.ev_timer_set = true;
                 setInterval(function() {
                     window.parent.postMessage({type: 'streamlit:render'}, '*');
                 }, 30000);

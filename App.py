@@ -3,45 +3,51 @@ import datetime
 import json
 import os
 
-# Podešavanje stranice za mobilne telefone i automatsko forsiranje tamne teme
+# Podešavanje stranice - uklanjanje nepotrebnih margina
 st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="centered")
 
-# Injektovanje CSS-a za globalnu tamnu pozadinu cele aplikacije i stilizovanje dugmića
+# Injektovanje ultra-kompaktnog CSS-a da sve stane na jedan ekran bez skrolovanja
 st.markdown("""
     <style>
-        /* Sila za tamnu pozadinu aplikacije */
+        /* Pozadina aplikacije */
         .stApp {
             background-color: #121214 !important;
             color: #ffffff !important;
         }
-        /* Srednji deo - uklanjanje podrazumevanih Streamlit margina oko teksta */
+        /* Smanjivanje glavnog praznog prostora na vrhu Streamlit-a */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            max-width: 100% !important;
+        }
+        /* Smanjivanje margina oko markdown elemenata */
         [data-testid="stMarkdownContainer"] p {
             color: #e2e8f0 !important;
+            margin-bottom: 4px !important;
         }
-        /* Stilizovanje glavnih Streamlit dugmića (Check-in, Oslobodi...) */
+        /* Kompaktna i manja dugmad */
         .stButton > button {
             background-color: #007AFF !important; 
             color: white !important; 
-            height: 46px !important; 
-            font-size: 15px !important; 
+            height: 38px !important; 
+            font-size: 14px !important; 
             font-weight: bold !important; 
-            border-radius: 10px !important;
+            border-radius: 8px !important;
             border: none !important;
-            transition: background 0.2s ease;
+            margin-top: 2px !important;
+            margin-bottom: 2px !important;
         }
-        .stButton > button:hover {
-            background-color: #0062cc !important;
-        }
-        /* Poseban stil za dugme za oslobađanje (Crveno/Narandžasto) */
+        /* Crveno dugme za završetak */
         div.element-container:has(button:contains("Završi punjenje")) button {
             background-color: #ff453a !important;
         }
-        /* Stilizovanje polja za unos teksta (Input polja) */
+        /* Kompaktna polja za unos teksta */
         .stTextInput input {
             background-color: #1a1a1e !important;
             color: white !important;
             border: 1px solid #2a2a30 !important;
-            border-radius: 8px !important;
+            border-radius: 6px !important;
+            height: 36px !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -50,7 +56,6 @@ st.markdown("""
 FAJL_BAZE = "baza_stanja.json"
 
 def nase_trenutno_vreme():
-    # Serversko UTC vreme pomeramo za +2 sata (naša vremenska zona)
     return datetime.datetime.utcnow() + datetime.timedelta(hours=2)
 
 def ucitaj_bazu():
@@ -76,22 +81,20 @@ def sacuvaj_bazu(d):
     with open(FAJL_BAZE, "w") as f:
         json.dump(kopija, f)
 
-# Učitavanje trenutnog stanja
 if "db" not in st.session_state:
     st.session_state.db = ucitaj_bazu()
 
-# NASLOV I ONLINE STATUS (Novi UI sa većim fontovima i neon zelenom značkom)
-st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 32px; font-weight: 800; margin-bottom: 0;'>⚡ EV Punjači</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 18px; margin-top: 2px; margin-bottom: 8px;'>Lidl Galenika</p>", unsafe_allow_html=True)
+# MAKSIMALNO SMANJEN ZAGLAVLJE (Manji fontovi, manji razmaci)
+st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 0;'>⚡ EV Punjači</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 14px; margin-top: 0; margin-bottom: 4px;'>Lidl Galenika</p>", unsafe_allow_html=True)
 st.markdown("""
-<div style="text-align: center; margin-bottom: 25px;">
-    <span style="display: inline-block; background-color: rgba(57, 211, 83, 0.1); color: #39d353; border: 1px solid rgba(57, 211, 83, 0.3); padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 13px;">✓ Online</span>
+<div style="text-align: center; margin-bottom: 12px;">
+    <span style="display: inline-block; background-color: rgba(57, 211, 83, 0.1); color: #39d353; border: 1px solid rgba(57, 211, 83, 0.3); padding: 2px 10px; border-radius: 20px; font-weight: bold; font-size: 11px;">✓ Online</span>
 </div>
 """, unsafe_allow_html=True)
 
 db = st.session_state.db
 
-# Popravka u letu ako je vreme povuklo zonu iz prošlog koda
 if db["vreme_pocetka"] and hasattr(db["vreme_pocetka"], "tzinfo") and db["vreme_pocetka"].tzinfo is not None:
     db["vreme_pocetka"] = db["vreme_pocetka"].replace(tzinfo=None)
 
@@ -100,18 +103,17 @@ if db["slobodan"]:
 else:
     status_tekst, status_boja, status_bg = f"Zauzet ({db['korisnik']})", "#ff453a", "rgba(255, 69, 58, 0.1)"
 
-# GLAVNA KARTICA PUNJAČA (Tamna pozadina, pojačana slova za 22kW i uočljiva napomena)
+# KOMPAKTNA KARTICA PUNJAČA (Smanjen padding sa 20px na 12px, manja slova)
 punjac_html = f"""
-<div style="border: 1px solid #2a2a30; border-radius: 16px; padding: 20px; background-color: #1a1a1e; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-        <h3 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700;">EV Punjač Lidl Galenika</h3>
-        <span style="background-color: {status_bg}; color: {status_boja}; border: 1px solid {status_boja}44; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; white-space: nowrap;">{status_tekst}</span>
+<div style="border: 1px solid #2a2a30; border-radius: 12px; padding: 12px; background-color: #1a1a1e; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <h3 style="margin: 0; color: #ffffff; font-size: 16px; font-weight: 700;">EV Punjač Lidl Galenika</h3>
+        <span style="background-color: {status_bg}; color: {status_boja}; border: 1px solid {status_boja}44; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status_tekst}</span>
     </div>
-    <p style="margin: 6px 0; color: #94a3b8; font-size: 15px;">📍 Galenika, Zemun</p>
-    <p style="margin: 6px 0 12px 0; color: #ffffff; font-size: 24px; font-weight: 900;">🔋 22kW</p>
-    <div style="background-color: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 10px; border-radius: 0 8px 8px 0; margin-top: 12px;">
-        <p style="margin: 0; color: #fef3c7; font-size: 13px; font-weight: 500; line-height: 1.45;">
-            <strong>⚠️ NAPOMENA:</strong> Molimo korisnike da punjač koriste maksimalno 1 sat, koliko i sam punjač fabrički dozvoljava. Budimo kolegijalni!
+    <p style="margin: 2px 0; color: #94a3b8; font-size: 13px;">📍 Galenika, Zemun &nbsp;&nbsp;&nbsp; <b>🔋 22kW</b></p>
+    <div style="background-color: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 6px 10px; border-radius: 0 6px 6px 0; margin-top: 6px;">
+        <p style="margin: 0; color: #fef3c7; font-size: 11px; font-weight: 500; line-height: 1.3;">
+            <strong>⚠️ NAPOMENA:</strong> Koristite max 1 sat (fabrički limit). Budimo kolegijalni!
         </p>
     </div>
 </div>
@@ -119,8 +121,8 @@ punjac_html = f"""
 st.markdown(punjac_html, unsafe_allow_html=True)
 
 if db["slobodan"]:
-    st.markdown("<p style='font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 4px; margin-top: 10px;'>UKUCAJ SVOJE IME IZ VIBER GRUPE:</p>", unsafe_allow_html=True)
-    ime_korisnika = st.text_input("Ime", placeholder="Npr. Goran, Nikola, Dejan...", label_visibility="collapsed")
+    st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
+    ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed")
     
     if st.button("Check-in", use_container_width=True):
         if ime_korisnika.strip() != "":
@@ -130,9 +132,9 @@ if db["slobodan"]:
             sacuvaj_bazu(db)
             st.rerun()
         else:
-            st.warning("Molimo vas unesite ime pre čekiranja.")
+            st.warning("Unesite ime pre čekiranja.")
 else:
-    # SMANJENI I SPAKOVANI DONJI DEO (Automatsko osvežavanje 30s, sve stoji u jednoj tankoj liniji)
+    # ULTRA-TANKI DONJI DEO (Sve spakovano po visini)
     @st.fragment(run_every="30s")
     def prikazi_tajmer():
         vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
@@ -141,28 +143,22 @@ else:
         sati = max(0, ukupno_sekundi // 3600)
         minuti = max(0, (ukupno_sekundi % 3600) // 60)
         
-        if sati > 0:
-            vreme_prikaz = f"{sati}h {minuti}min"
-        else:
-            vreme_prikaz = f"{minuti} min"
+        vreme_prikaz = f"{sati}h {minuti}min" if sati > 0 else f"{minuti} min"
             
-        # Generisanje tanke plave linije (spojenih podataka) prema tvom zahtevu
         status_linija_html = f"""
-        <div style="background-color: rgba(0, 122, 255, 0.1); border: 1px solid rgba(0, 122, 255, 0.25); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-            <div style="font-size: 15px; color: #e2e8f0; display: flex; items-center: center; gap: 6px;">
+        <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 4px;">
                 <span>⏱️</span>
-                <span><strong style="color: #ffffff;">{db['korisnik']}</strong> puni već <strong style="color: #007AFF; font-size: 18px; font-weight: 900;">{vreme_prikaz}</strong></span>
+                <span><strong style="color: #ffffff;">{db['korisnik']}</strong> puni već <strong style="color: #007AFF; font-size: 15px; font-weight: 900;">{vreme_prikaz}</strong></span>
             </div>
-            <span style="font-size: 12px; color: #94a3b8; font-weight: 500;">od {vreme_kacenja}h</span>
+            <span style="font-size: 11px; color: #94a3b8;">od {vreme_kacenja}h</span>
         </div>
         """
         st.markdown(status_linija_html, unsafe_allow_html=True)
         
-        # Ako punjenje pređe 60 minuta, ispisuje se crveno upozorenje
         if ukupno_sekundi >= 3600:
-            st.error("⏰ Isteklo je maksimalnih sat vremena punjenja! Molimo oslobodite mesto za sledećeg korisnika.")
+            st.error("⏰ Isteklo je sat vremena punjenja!")
     
-    # Pozivamo tajmer
     prikazi_tajmer()
         
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
@@ -176,27 +172,25 @@ else:
         sacuvaj_bazu(db)
         st.rerun()
 
-st.write("") 
-
-# LISTA ČEKANJA (Takođe stilizovana u tamnoj temi)
+# TANJA LISTA ČEKANJA
 broj_u_redu = len(db["red"])
 st.markdown(f"""
-<div style="border: 1px solid #2a2a30; border-radius: 16px; padding: 16px; background-color: #1a1a1e; margin-bottom: 12px;">
+<div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 16px; font-weight: bold; color: #ffffff;">📋 Lista čekanja</span>
-        <span style="background-color: rgba(0, 122, 255, 0.15); color: #007AFF; padding: 2px 10px; border-radius: 20px; font-weight: bold; font-size: 13px;">{broj_u_redu}</span>
+        <span style="font-size: 14px; font-weight: bold; color: #ffffff;">📋 Lista čekanja</span>
+        <span style="background-color: rgba(0, 122, 255, 0.15); color: #007AFF; padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 11px;">{broj_u_redu}</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 if broj_u_redu == 0:
-    st.markdown("<p style='text-align: center; color: #64748b; font-size: 14px; margin-bottom: 15px;'>Nema ljudi u redu</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #64748b; font-size: 12px; margin-bottom: 4px;'>Nema ljudi u redu</p>", unsafe_allow_html=True)
 else:
-    for i, ime in enumerate(db["red"]):
-        st.markdown(f"<div style='padding: 8px 14px; background: #222226; border: 1px solid #2a2a30; border-radius: 8px; margin-bottom: 6px; font-size: 14px; color: #e2e8f0;'><b>{i+1}.</b> {ime}</div>", unsafe_allow_html=True)
+    # Prikaz liste čekanja u jednom redu radi uštede mesta ako ih ima više
+    imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])
+    st.markdown(f"<div style='padding: 6px 10px; background: #1a1a1e; border: 1px dashed #2a2a30; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #e2e8f0;'>{imena_u_redu}</div>", unsafe_allow_html=True)
 
 if not db["slobodan"]:
-    st.write("")
     ime_za_listu = st.text_input("Tvoje ime za listu", placeholder="Unesi ime za red...", key="red_ime", label_visibility="collapsed")
     if st.button("+ Pridruži se redu", use_container_width=True):
         if ime_za_listu.strip() != "":

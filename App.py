@@ -59,7 +59,7 @@ st.markdown("""
             border-radius: 6px !important;
             height: 36px !important;
         }
-        /* Centriranje i sužavanje Streamlit error poruka */
+        /* Centriranje i sužavanje Streamlit error/warning poruka */
         .stAlert {
             width: 90% !important;
             margin-left: auto !important;
@@ -206,5 +206,6 @@ else:
     st.markdown(f"<div style='padding: 6px 10px; background: #1a1a1e; border: 1px dashed #2a2a30; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #e2e8f0; width: 90%; margin-left: auto; margin-right: auto;'>{imena_u_redu}</div>", unsafe_allow_html=True)
 
 if not db["slobodan"]:
+    st.write("")
     ime_za_listu = st.text_input("Tvoje ime za listu", placeholder="Unesi ime za red...", key="red_ime", label_visibility="collapsed")
     if st.button("+ Pridruži se redu", use_container_width=True):

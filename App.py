@@ -103,7 +103,7 @@ if db["slobodan"]:
 else:
     status_tekst, status_boja, status_bg = f"Zauzet ({db['korisnik']})", "#ff453a", "rgba(255, 69, 58, 0.1)"
 
-# KOMPAKTNA KARTICA PUNJAČA (Smanjen padding sa 20px na 12px, manja slova)
+# KARTICA PUNJAČA SA CRVENOM NAPOMENOM I IZMENJENIM TEKSTOM
 punjac_html = f"""
 <div style="border: 1px solid #2a2a30; border-radius: 12px; padding: 12px; background-color: #1a1a1e; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -111,9 +111,9 @@ punjac_html = f"""
         <span style="background-color: {status_bg}; color: {status_boja}; border: 1px solid {status_boja}44; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">{status_tekst}</span>
     </div>
     <p style="margin: 2px 0; color: #94a3b8; font-size: 13px;">📍 Galenika, Zemun &nbsp;&nbsp;&nbsp; <b>🔋 22kW</b></p>
-    <div style="background-color: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 6px 10px; border-radius: 0 6px 6px 0; margin-top: 6px;">
-        <p style="margin: 0; color: #fef3c7; font-size: 11px; font-weight: 500; line-height: 1.3;">
-            <strong>⚠️ NAPOMENA:</strong> Koristite max 1 sat (fabrički limit). Budimo kolegijalni!
+    <div style="background-color: rgba(239, 68, 68, 0.15); border-left: 3px solid #ff453a; padding: 6px 10px; border-radius: 0 6px 6px 0; margin-top: 6px;">
+        <p style="margin: 0; color: #ffffff; font-size: 11px; font-weight: 500; line-height: 1.3;">
+            <strong style="color: #ff453a;">⚠️ NAPOMENA:</strong> Koristite max 1 sat (limit punjenja). Budimo kolegijalni!
         </p>
     </div>
 </div>
@@ -134,7 +134,7 @@ if db["slobodan"]:
         else:
             st.warning("Unesite ime pre čekiranja.")
 else:
-    # ULTRA-TANKI DONJI DEO (Sve spakovano po visini)
+    # ULTRA-TANKI DONJI DEO 
     @st.fragment(run_every="30s")
     def prikazi_tajmer():
         vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
@@ -172,7 +172,7 @@ else:
         sacuvaj_bazu(db)
         st.rerun()
 
-# TANJA LISTA ČEKANJA
+# LISTA ČEKANJA
 broj_u_redu = len(db["red"])
 st.markdown(f"""
 <div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px;">
@@ -186,7 +186,6 @@ st.markdown(f"""
 if broj_u_redu == 0:
     st.markdown("<p style='text-align: center; color: #64748b; font-size: 12px; margin-bottom: 4px;'>Nema ljudi u redu</p>", unsafe_allow_html=True)
 else:
-    # Prikaz liste čekanja u jednom redu radi uštede mesta ako ih ima više
     imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])
     st.markdown(f"<div style='padding: 6px 10px; background: #1a1a1e; border: 1px dashed #2a2a30; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #e2e8f0;'>{imena_u_redu}</div>", unsafe_allow_html=True)
 

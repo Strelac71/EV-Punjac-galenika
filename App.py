@@ -2,6 +2,7 @@ import streamlit as st
 import datetime
 import json
 import os
+from zoneinfo import ZoneInfo
 
 # Podešavanje stranice za mobilne telefone
 st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="centered")
@@ -9,13 +10,17 @@ st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="
 # Lokacija fajla koji glumi bazu podataka
 FAJL_BAZE = "baza_stanja.json"
 
+# Definisana vremenska zona za Srbiju
+VREMENSKA_ZONA = ZoneInfo("Europe/Belgrade")
+
 def ucitaj_bazu():
     if os.path.exists(FAJL_BAZE):
         try:
             with open(FAJL_BAZE, "r") as f:
                 d = json.load(f)
                 if d.get("vreme_pocetka"):
-                    d["vreme_pocetka"] = datetime.datetime.fromisoformat(d["vreme_pocetka"])
+                    # Učitavamo vreme i obavezno mu dodeljujemo beogradsku vremensku zonu
+                    d["vreme_pocetka"] = datetime.datetime.fromisoformat(d["vreme_pocetka"]).astimezone(VREMENSKA_ZONA)
                 return d
         except:
             pass
@@ -64,7 +69,8 @@ if db["slobodan"]:
         if ime_korisnika.strip() != "":
             db["slobodan"] = False
             db["korisnik"] = ime_korisnika
-            db["vreme_pocetka"] = datetime.datetime.now()
+            # Uzimamo trenutno vreme u Srbiji
+            db["vreme_pocetka"] = datetime.datetime.now(VREMENSKA_ZONA)
             sacuvaj_bazu(db)
             st.rerun()
         else:
@@ -73,8 +79,8 @@ else:
     # Izvlačenje tačnog vremena kada se korisnik zakačio (Format npr. 14:32)
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     
-    # Računanje vremena punjenja uživo
-    proteklo = datetime.datetime.now() - db["vreme_pocetka"]
+    # Računanje vremena punjenja uživo sa tačnom vremenskom zonom
+    proteklo = datetime.datetime.now(VREMENSKA_ZONA) - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
     sati = ukupno_sekundi // 3600
     minuti = (ukupno_sekundi % 3600) // 60
@@ -102,7 +108,8 @@ else:
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)
-            db["vreme_pocetka"] = datetime.datetime.now()
+            # Sledeći korisnik dobija tačno vreme u Srbiji
+            db["vreme_pocetka"] = datetime.datetime.now(VREMENSKA_ZONA)
         else:
             db["slobodan"] = True
             db["korisnik"] = ""

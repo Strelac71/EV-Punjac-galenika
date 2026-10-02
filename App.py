@@ -50,7 +50,7 @@ punjac_html = f"""
         <span style="background-color: {status_bg}; color: {status_boja}; border: 1px solid {status_boja}33; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px;">{status_tekst}</span>
     </div>
     <p style="margin: 8px 0 4px 0; color: #64748b; font-size: 14px;">📍 Galenika, Zemun</p>
-    <p style="margin: 0; color: #64748b; font-size: 14px;">🔋 20kW DC</p>
+    <p style="margin: 0; color: #64748b; font-size: 14px;">🔋 22kw DC</p>
 </div>
 """
 st.markdown(punjac_html, unsafe_allow_html=True)

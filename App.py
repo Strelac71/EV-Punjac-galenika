@@ -19,11 +19,9 @@ def ucitaj_bazu():
             with open(FAJL_BAZE, "r") as f:
                 d = json.load(f)
                 if d.get("vreme_pocetka"):
-                    # Bezbedno učitavanje bez obzira na stari format
                     try:
                         d["vreme_pocetka"] = datetime.datetime.fromisoformat(d["vreme_pocetka"])
                     except:
-                        # Ako je vreme oštećeno ili u čudnom formatu, resetujemo ga na trenutno
                         d["vreme_pocetka"] = nase_trenutno_vreme()
                 return d
         except:
@@ -33,7 +31,6 @@ def ucitaj_bazu():
 def sacuvaj_bazu(d):
     kopija = d.copy()
     if kopija.get("vreme_pocetka"):
-        # Čuvamo vreme u čistom formatu bez ikakvih sufiksa zona koji prave greške
         if isinstance(kopija["vreme_pocetka"], datetime.datetime):
             kopija["vreme_pocetka"] = kopija["vreme_pocetka"].replace(tzinfo=None).isoformat()
     with open(FAJL_BAZE, "w") as f:
@@ -85,34 +82,24 @@ if db["slobodan"]:
         else:
             st.warning("Molimo vas unesite ime pre čekiranja.")
 else:
-    # Izvlačenje tačnog vremena kada se korisnik zakačio (Format npr. 14:32)
-    vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
-    
-    # Računanje vremena punjenja uživo
-    proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
-    ukupno_sekundi = int(proteklo.total_seconds())
-    sati = max(0, ukupno_sekundi // 3600)
-    minuti = max(0, (ukupno_sekundi % 3600) // 60)
-    
-    if sati > 0:
-        vreme_prikaz = f"{sati}h {minuti}min"
-    else:
-        vreme_prikaz = f"{minuti} min"
+    # OVAJ DEO KODA SE AUTOMATSKI OSVEŽAVA SVAKIH 30 SEKUNDI
+    @st.fragment(run_every="30s")
+    def prikazi_tajmer():
+        vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
+        proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
+        ukupno_sekundi = int(proteklo.total_seconds())
+        sati = max(0, ukupno_sekundi // 3600)
+        minuti = max(0, (ukupno_sekundi % 3600) // 60)
         
-    # Prikaz i vremena kačenja i dužine punjenja
-    st.info(f"⚡ Zakačio/la se: **{db['korisnik']}** u **{vreme_kacenja}h**\n\n⏱️ Puni se već: **{vreme_prikaz}**")
+        if sati > 0:
+            vreme_prikaz = f"{sati}h {minuti}min"
+        else:
+            vreme_prikaz = f"{minuti} min"
+            
+        st.info(f"⚡ Zakačio/la se: **{db['korisnik']}** u **{vreme_kacenja}h**\n\n⏱️ Puni se već: **{vreme_prikaz}**")
     
-    # Automatsko osvežavanje ekrana na 30 sekundi
-    st.html("""
-        <script>
-            if (!window.ev_timer_set) {
-                window.ev_timer_set = true;
-                setInterval(function() {
-                    window.parent.postMessage({type: 'streamlit:render'}, '*');
-                }, 30000);
-            }
-        </script>
-    """)
+    # Pozivamo tajmer
+    prikazi_tajmer()
         
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:

@@ -55,7 +55,7 @@ if db["slobodan"]:
 else:
     status_tekst, status_boja, status_bg = f"Zauzet ({db['korisnik']})", "#ef4444", "#fef2f2"
 
-# Snaga 22kW
+# Snaga 22kW + Dodata zvanična napomena o limitu od 1 sat
 punjac_html = f"""
 <div style="border: 2px solid #22c55e; border-radius: 12px; padding: 15px; background-color: white; margin-bottom: 10px;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -63,7 +63,11 @@ punjac_html = f"""
         <span style="background-color: {status_bg}; color: {status_boja}; border: 1px solid {status_boja}33; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 12px;">{status_tekst}</span>
     </div>
     <p style="margin: 8px 0 4px 0; color: #64748b; font-size: 14px;">📍 Galenika, Zemun</p>
-    <p style="margin: 0; color: #64748b; font-size: 14px;">🔋 22kW</p>
+    <p style="margin: 0 0 6px 0; color: #64748b; font-size: 14px;">🔋 22kW</p>
+    <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #cbd5e1;">
+    <p style="margin: 0; color: #b45309; font-size: 12px; font-weight: bold; line-height: 1.4;">
+        ⚠️ NAPOMENA: Molimo korisnike da punjač koriste maksimalno 1 sat, koliko i sam punjač fabrički dozvoljava. Budimo kolegijalni!
+    </p>
 </div>
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
@@ -97,6 +101,10 @@ else:
             vreme_prikaz = f"{minuti} min"
             
         st.info(f"⚡ Zakačio/la se: **{db['korisnik']}** u **{vreme_kacenja}h**\n\n⏱️ Puni se već: **{vreme_prikaz}**")
+        
+        # Ako punjenje pređe 60 minuta, ispisuje se crveno upozorenje
+        if ukupno_sekundi >= 3600:
+            st.error("⏰ Isteklo je maksimalnih sat vremena punjenja! Molimo oslobodite mesto za sledećeg korisnika.")
     
     # Pozivamo tajmer
     prikazi_tajmer()

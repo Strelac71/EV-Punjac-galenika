@@ -9,14 +9,6 @@ st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="
 # Lokacija fajla koji glumi bazu podataka
 FAJL_BAZE = "baza_stanja.json"
 
-# FUNKCIJA KOJA VRAĆA TRENUTNO VREME U SRBIJI
-def nase_trenutno_vreme():
-    # Streamlit serveri su u UTC zoni, Srbija je UTC+1 (zimi) ili UTC+2 (leti)
-    # Da ne bismo instalirali dodatne biblioteke, pravimo ručni pomak na osnovu UTC-a
-    utc_sada = datetime.datetime.now(datetime.timezone.utc)
-    # Standardno vreme za našu zonu (Beograd)
-    return utc_sada + datetime.timedelta(hours=2)
-
 def ucitaj_bazu():
     if os.path.exists(FAJL_BAZE):
         try:
@@ -32,9 +24,7 @@ def ucitaj_bazu():
 def sacuvaj_bazu(d):
     kopija = d.copy()
     if kopija.get("vreme_pocetka"):
-        # Čuvanje u standardnom ISO formatu bez zonskih komplikacija
-        if isinstance(kopija["vreme_pocetka"], datetime.datetime):
-            kopija["vreme_pocetka"] = kopija["vreme_pocetka"].isoformat()
+        kopija["vreme_pocetka"] = kopija["vreme_pocetka"].isoformat()
     with open(FAJL_BAZE, "w") as f:
         json.dump(kopija, f)
 
@@ -74,23 +64,18 @@ if db["slobodan"]:
         if ime_korisnika.strip() != "":
             db["slobodan"] = False
             db["korisnik"] = ime_korisnika
-            db["vreme_pocetka"] = nase_trenutno_vreme()
+            db["vreme_pocetka"] = datetime.datetime.now()
             sacuvaj_bazu(db)
             st.rerun()
         else:
             st.warning("Molimo vas unesite ime pre čekiranja.")
 else:
-    # Izvlačenje tačnog lokalnog vremena kada se korisnik zakačio
+    # Izvlačenje tačnog vremena kada se korisnik zakačio (Format npr. 14:32)
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     
-    # Računanje vremena punjenja uživo na osnovu našeg vremena
-    proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
+    # Računanje vremena punjenja uživo
+    proteklo = datetime.datetime.now() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
-    
-    # Sigurnosni filter ako server minimalno zakasni sa sekundama na početku
-    if ukupno_sekundi < 0:
-        ukupno_sekundi = 0
-        
     sati = ukupno_sekundi // 3600
     minuti = (ukupno_sekundi % 3600) // 60
     
@@ -99,6 +84,7 @@ else:
     else:
         vreme_prikaz = f"{minuti} min"
         
+    # Prikaz i vremena kačenja i dužine punjenja
     st.info(f"⚡ Zakačio/la se: **{db['korisnik']}** u **{vreme_kacenja}h**\n\n⏱️ Puni se već: **{vreme_prikaz}**")
     
     # Automatsko osvežavanje ekrana na 30 sekundi
@@ -116,7 +102,7 @@ else:
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)
-            db["vreme_pocetka"] = nase_trenutno_vreme()
+            db["vreme_pocetka"] = datetime.datetime.now()
         else:
             db["slobodan"] = True
             db["korisnik"] = ""

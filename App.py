@@ -149,7 +149,7 @@ punjac_html = f"""
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
 
-# GLAVNA LOGIKA ZA CHECK-IN / TAJMER
+# LOGIKA ZA SLOBODAN PUNJAČ
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
     ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="checkin_ime")
@@ -163,7 +163,9 @@ if db["slobodan"]:
             st.rerun()
         else:
             st.warning("Unesite ime pre čekiranja.")
-else:
+
+# LOGIKA ZA ZAUZET PUNJAČ
+if not db["slobodan"]:
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())

@@ -19,7 +19,6 @@ st.markdown("""
         .viewerBadge {
             display: none !important;
         }
-        /* Dodatna pravila za potpuno uklanjanje "Manage app" dugmeta na dnu */
         .stAppDeployButton {
             display: none !important;
         }
@@ -27,6 +26,13 @@ st.markdown("""
             display: none !important;
         }
         div[data-testid="stStatusWidget"] {
+            display: none !important;
+        }
+        /* Dodatno agresivno pravilo za sakrivanje donje Streamlit sistemske trake */
+        div[class^="st-emotion-cache"] footer, div[class^="viewerBadge"] {
+            display: none !important;
+        }
+        [data-testid="stDecoration"] {
             display: none !important;
         }
 
@@ -163,7 +169,6 @@ st.markdown(punjac_html, unsafe_allow_html=True)
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
     ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="checkin_ime")
-    
     if st.button("Check-in", use_container_width=True):
         if ime_korisnika.strip() != "":
             db["slobodan"] = False
@@ -181,9 +186,7 @@ if not db["slobodan"]:
     ukupno_sekundi = int(proteklo.total_seconds())
     sati = max(0, ukupno_sekundi // 3600)
     minuti = max(0, (ukupno_sekundi % 3600) // 60)
-    
     vreme_prikaz = f"{sati}h {minuti}min" if sati > 0 else f"{minuti} min"
-        
     status_linija_html = f"""
     <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 94%; margin-left: auto; margin-right: auto;">
         <div style="font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 4px;">
@@ -194,10 +197,8 @@ if not db["slobodan"]:
     </div>
     """
     st.markdown(status_linija_html, unsafe_allow_html=True)
-    
     if ukupno_sekundi >= 3600:
         st.error("⏰ Isteklo je sat vremena punjenja!")
-        
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)
@@ -209,15 +210,9 @@ if not db["slobodan"]:
         sacuvaj_bazu(db)
         st.rerun()
 
-# SUŽENA LISTA ČEKANJA
+# SUŽENA LISTA ČEKANJA (Sve je izvučeno linearno, bez "if/else" uvlačenja koda za ispis)
 broj_u_redu = len(db["red"])
 st.markdown(f"""
 <div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px; width: 94%; margin-left: auto; margin-right: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 14px; font-weight: bold; color: #ffffff;">📋 Lista čekanja</span>
-        <span style="background-color: rgba(0, 122, 255, 0.15); color: #007AFF; padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 11px;">{broj_u_redu}</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-if broj_u_redu == 0:

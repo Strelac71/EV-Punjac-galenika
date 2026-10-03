@@ -149,7 +149,7 @@ punjac_html = f"""
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
 
-# PRIKAZ LOGIKE U ZAVISNOSTI OD TOGA DA LI JE PUNJAČ SLOBODAN ILI ZAUZET
+# GLAVNA LOGIKA ZA CHECK-IN / TAJMER
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
     ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="checkin_ime")
@@ -164,32 +164,27 @@ if db["slobodan"]:
         else:
             st.warning("Unesite ime pre čekiranja.")
 else:
-    # TAJMER SA POVEĆANIM VREMENOM PUNJENJA
-    @st.fragment(run_every="30s")
-    def prikazi_tajmer():
-        vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
-        proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
-        ukupno_sekundi = int(proteklo.total_seconds())
-        sati = max(0, ukupno_sekundi // 3600)
-        minuti = max(0, (ukupno_sekundi % 3600) // 60)
+    vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
+    proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
+    ukupno_sekundi = int(proteklo.total_seconds())
+    sati = max(0, ukupno_sekundi // 3600)
+    minuti = max(0, (ukupno_sekundi % 3600) // 60)
+    
+    vreme_prikaz = f"{sati}h {minuti}min" if sati > 0 else f"{minuti} min"
         
-        vreme_prikaz = f"{sati}h {minuti}min" if sati > 0 else f"{minuti} min"
-            
-        status_linija_html = f"""
-        <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 94%; margin-left: auto; margin-right: auto;">
-            <div style="font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 4px;">
-                <span>⏱️</span>
-                <span><strong style="color: #ffffff;">{db['korisnik']}</strong> puni već <strong style="color: #007AFF; font-size: 18px; font-weight: 900; background-color: rgba(0, 122, 255, 0.15); padding: 2px 6px; border-radius: 4px;">{vreme_prikaz}</strong></span>
-            </div>
-            <span style="font-size: 11px; color: #94a3b8;">od {vreme_kacenja}h</span>
+    status_linija_html = f"""
+    <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 94%; margin-left: auto; margin-right: auto;">
+        <div style="font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 4px;">
+            <span>⏱️</span>
+            <span><strong style="color: #ffffff;">{db['korisnik']}</strong> puni već <strong style="color: #007AFF; font-size: 18px; font-weight: 900; background-color: rgba(0, 122, 255, 0.15); padding: 2px 6px; border-radius: 4px;">{vreme_prikaz}</strong></span>
         </div>
-        """
-        st.markdown(status_linija_html, unsafe_allow_html=True)
-        
-        if ukupno_sekundi >= 3600:
-            st.error("⏰ Isteklo je sat vremena punjenja!")
-            
-    prikazi_tajmer()
+        <span style="font-size: 11px; color: #94a3b8;">od {vreme_kacenja}h</span>
+    </div>
+    """
+    st.markdown(status_linija_html, unsafe_allow_html=True)
+    
+    if ukupno_sekundi >= 3600:
+        st.error("⏰ Isteklo je sat vremena punjenja!")
         
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
         if db["red"]:
@@ -216,3 +211,4 @@ st.markdown(f"""
 if broj_u_redu == 0:
     st.markdown("<p style='text-align: center; color: #64748b; font-size: 12px; margin-bottom: 4px;'>Nema ljudi u redu</p>", unsafe_allow_html=True)
 else:
+    imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])

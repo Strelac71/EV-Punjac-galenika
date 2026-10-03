@@ -9,7 +9,7 @@ st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="
 # Injektovanje ultra-kompaktnog, suženog i čistog CSS-a za mobilne ekrane
 st.markdown("""
     <style>
-        /* SAKRIVANJE SISTEMSKIH MENIJA (Share, GitHub, Manage app) */
+        /* POTPUNO SAKRIVANJE SISTEMSKIH MENIJA (Share, GitHub, Manage app) */
         [data-testid="stHeader"] {
             display: none !important;
         }
@@ -17,6 +17,16 @@ st.markdown("""
             display: none !important;
         }
         .viewerBadge {
+            display: none !important;
+        }
+        /* Dodatna pravila za potpuno uklanjanje "Manage app" dugmeta na dnu */
+        .stAppDeployButton {
+            display: none !important;
+        }
+        iframe[title="Managed Hosting Badge"] {
+            display: none !important;
+        }
+        div[data-testid="stStatusWidget"] {
             display: none !important;
         }
 
@@ -211,6 +221,3 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 if broj_u_redu == 0:
-    st.markdown("<p style='text-align: center; color: #64748b; font-size: 12px; margin-bottom: 4px;'>Nema ljudi u redu</p>", unsafe_allow_html=True)
-else:
-    imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])

@@ -9,50 +9,43 @@ st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="
 # Injektovanje ultra-kompaktnog, suženog i čistog CSS-a za mobilne ekrane
 st.markdown("""
     <style>
-        /* POTPUNO SAKRIVANJE SISTEMSKIH MENIJA (Share, GitHub, Manage app) */
-        [data-testid="stHeader"] {
-            display: none !important;
-        }
-        footer {
-            display: none !important;
-        }
-        .viewerBadge {
-            display: none !important;
-        }
-        .stAppDeployButton {
-            display: none !important;
-        }
-        iframe[title="Managed Hosting Badge"] {
-            display: none !important;
-        }
-        div[data-testid="stStatusWidget"] {
-            display: none !important;
-        }
-        div[class^="st-emotion-cache"] footer, div[class^="viewerBadge"] {
-            display: none !important;
-        }
+        /* UKLANJANJE SVAKOG MOGUĆEG SISTEMSKOG ELEMENTA I "MANAGE APP" TRACI */
+        [data-testid="stHeader"], footer, .viewerBadge, .stAppDeployButton, 
+        iframe[title="Managed Hosting Badge"], div[data-testid="stStatusWidget"], 
         [data-testid="stDecoration"] {
             display: none !important;
+            vertical-align: disappear !important;
+            clear: both !important;
         }
-
+        
+        /* Dodatno agresivno brisanje donje trake preko sistemskih klasa */
+        div[class^="st-emotion-cache"] footer, 
+        div[class^="viewerBadge"], 
+        div[class^="stAppDeployButton"] {
+            display: none !important;
+        }
+        
         /* Pozadina aplikacije */
         .stApp {
             background-color: #121214 !important;
             color: #ffffff !important;
         }
-        /* Smanjivanje glavnog praznog prostora na vrhu i optimalno fluidno sužavanje celog sadržaja */
+        
+        /* Smanjivanje praznog prostora i fluidno sužavanje celog sadržaja na mobilnom */
         .block-container {
             padding-top: 0.5rem !important;
             padding-bottom: 1rem !important;
             max-width: 94% !important;
             margin: 0 auto !important;
         }
-        /* Smanjivanje margina oko markdown elemenata */
+        
+        /* Smanjivanje margina oko pasusa teksta */
         [data-testid="stMarkdownContainer"] p {
             color: #e2e8f0 !important;
             margin-bottom: 4px !important;
         }
-        /* Kompaktna dugmad - smanjen unutrašnji padding da tekst nikada ne ispada */
+        
+        /* Kompaktna i upeglana dugmad sa bočnim marginama */
         .stButton > button {
             background-color: #007AFF !important; 
             color: white !important; 
@@ -69,11 +62,13 @@ st.markdown("""
             margin-left: auto !important;
             margin-right: auto !important;
         }
+        
         /* Crveno dugme za završetak punjenja */
         div.element-container:has(button:contains("Završi punjenje")) button {
             background-color: #ff453a !important;
         }
-        /* Fluidna i blago sužena polja za unos teksta */
+        
+        /* Fluidna i sužena polja za unos teksta */
         .stTextInput > div {
             width: 94% !important;
             margin-left: auto !important;
@@ -87,7 +82,8 @@ st.markdown("""
             height: 36px !important;
             font-size: 13px !important;
         }
-        /* Centriranje i fluidno sužavanje Streamlit error/warning poruka */
+        
+        /* Centriranje i sužavanje Streamlit upozorenja */
         .stAlert {
             width: 94% !important;
             margin-left: auto !important;
@@ -111,7 +107,7 @@ def ucitaj_bazu():
                     try:
                         d["vreme_pocetka"] = datetime.datetime.fromisoformat(d["vreme_pocetka"])
                     except:
-                        d["vreme_pocetka"] = nase_trenutre_vreme()
+                        d["vreme_pocetka"] = nase_trenutno_vreme()
                 return d
         except:
             pass
@@ -128,7 +124,7 @@ def sacuvaj_bazu(d):
 if "db" not in st.session_state:
     st.session_state.db = ucitaj_bazu()
 
-# SMANJENI GLAVNI NASLOV U JEDNINI
+# NASLOV I LOKACIJA
 st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 0;'>⚡ EV Punjač</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 13px; margin-top: 0; margin-bottom: 2px;'>Lidl Galenika</p>", unsafe_allow_html=True)
 st.markdown("<div style='text-align: center; margin-bottom: 10px;'><span style='display: inline-block; background-color: rgba(57, 211, 83, 0.1); color: #39d353; border: 1px solid rgba(57, 211, 83, 0.3); padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 10px;'>✓ Online</span></div>", unsafe_allow_html=True)
@@ -160,11 +156,14 @@ punjac_html = f"""
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
 
-# LOGIKA ZA SLOBODAN PUNJAČ
+# ----------------------------------------------------
+# EKRAN 1: PUNJAČ JE SLOBODAN (Prikazuje se samo Check-in)
+# ----------------------------------------------------
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
-    ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="checkin_ime")
-    if st.button("Check-in", use_container_width=True):
+    ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="kljuc_checkin_input")
+    
+    if st.button("Check-in", use_container_width=True, key="kljuc_checkin_dugme"):
         if ime_korisnika.strip() != "":
             db["slobodan"] = False
             db["korisnik"] = ime_korisnika
@@ -174,14 +173,18 @@ if db["slobodan"]:
         else:
             st.warning("Unesite ime pre čekiranja.")
 
-# LOGIKA ZA ZAUZET PUNJAČ
-if not db["slobodan"]:
+# ----------------------------------------------------
+# EKRAN 2: PUNJAČ JE ZAUZET (Prikazuje se Tajmer, Lista i Forma za red)
+# ----------------------------------------------------
+else:
+    # 1. Prikaz i računanje tajmera
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
     sati = max(0, ukupno_sekundi // 3600)
     minuti = max(0, (ukupno_sekundi % 3600) // 60)
     vreme_prikaz = f"{sati}h {minuti}min" if sati > 0 else f"{minuti} min"
+    
     status_linija_html = f"""
     <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 94%; margin-left: auto; margin-right: auto;">
         <div style="font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 4px;">
@@ -192,9 +195,12 @@ if not db["slobodan"]:
     </div>
     """
     st.markdown(status_linija_html, unsafe_allow_html=True)
+    
     if ukupno_sekundi >= 3600:
         st.error("⏰ Isteklo je sat vremena punjenja!")
-    if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True):
+        
+    # 2. Dugme za oslobađanje punjača
+    if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True, key="kljuc_Zavrsi_dugme"):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)
             db["vreme_pocetka"] = nase_trenutno_vreme()
@@ -205,14 +211,8 @@ if not db["slobodan"]:
         sacuvaj_bazu(db)
         st.rerun()
 
-# SUŽENA LISTA ČEKANJA
-broj_u_redu = len(db["red"])
-st.markdown(f"""
-<div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px; width: 94%; margin-left: auto; margin-right: auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 14px; font-weight: bold; color: #ffffff;">📋 Lista čekanja</span>
-        <span style="background-color: rgba(0, 122, 255, 0.15); color: #007AFF; padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 11px;">{broj_u_redu}</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
+    # 3. Naslov liste čekanja
+    broj_u_redu = len(db["red"])
+    st.markdown(f"""
+    <div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px; width: 94%; margin-left: auto; margin-right: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">

@@ -3,94 +3,16 @@ import datetime
 import json
 import os
 
-# Podešavanje stranice - uklanjanje nepotrebnih margina
-st.set_page_config(page_title="EV Punjač - Galenika", page_icon="⚡", layout="centered")
+# Podešavanje stranice - ČISTO UKLANJANJE MENIJA I MARGINA PREKO PODRAZUMEVANIH PODEŠAVANJA
+st.set_page_config(
+    page_title="EV Punjač - Galenika", 
+    page_icon="⚡", 
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
 
-# Injektovanje ultra-kompaktnog, suženog i čistog CSS-a za mobilne ekrane
-st.markdown("""
-    <style>
-        /* UKLANJANJE SVAKOG MOGUĆEG SISTEMSKOG ELEMENTA I "MANAGE APP" TRACI */
-        [data-testid="stHeader"], footer, .viewerBadge, .stAppDeployButton, 
-        iframe[title="Managed Hosting Badge"], div[data-testid="stStatusWidget"], 
-        [data-testid="stDecoration"] {
-            display: none !important;
-            vertical-align: disappear !important;
-            clear: both !important;
-        }
-        
-        /* Dodatno agresivno brisanje donje trake preko sistemskih klasa */
-        div[class^="st-emotion-cache"] footer, 
-        div[class^="viewerBadge"], 
-        div[class^="stAppDeployButton"] {
-            display: none !important;
-        }
-        
-        /* Pozadina aplikacije */
-        .stApp {
-            background-color: #121214 !important;
-            color: #ffffff !important;
-        }
-        
-        /* Smanjivanje praznog prostora i fluidno sužavanje celog sadržaja na mobilnom */
-        .block-container {
-            padding-top: 0.5rem !important;
-            padding-bottom: 1rem !important;
-            max-width: 94% !important;
-            margin: 0 auto !important;
-        }
-        
-        /* Smanjivanje margina oko pasusa teksta */
-        [data-testid="stMarkdownContainer"] p {
-            color: #e2e8f0 !important;
-            margin-bottom: 4px !important;
-        }
-        
-        /* Kompaktna i upeglana dugmad sa bočnim marginama */
-        .stButton > button {
-            background-color: #007AFF !important; 
-            color: white !important; 
-            height: 38px !important; 
-            padding: 0px 10px !important;
-            font-size: 13px !important; 
-            font-weight: bold !important; 
-            border-radius: 8px !important;
-            border: none !important;
-            margin-top: 2px !important;
-            margin-bottom: 2px !important;
-            width: 94% !important;
-            display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-        
-        /* Crveno dugme za završetak punjenja */
-        div.element-container:has(button:contains("Završi punjenje")) button {
-            background-color: #ff453a !important;
-        }
-        
-        /* Fluidna i sužena polja za unos teksta */
-        .stTextInput > div {
-            width: 94% !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-        .stTextInput input {
-            background-color: #1a1a1e !important;
-            color: white !important;
-            border: 1px solid #2a2a30 !important;
-            border-radius: 6px !important;
-            height: 36px !important;
-            font-size: 13px !important;
-        }
-        
-        /* Centriranje i sužavanje Streamlit upozorenja */
-        .stAlert {
-            width: 94% !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
+# Injektovanje ultra-kompaktnog i sigurnog CSS-a bez znakova procenta
+st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stHeader'] { display: none !important; } footer { display: none !important; } .viewerBadge { display: none !important; } .stAppDeployButton { display: none !important; } iframe[title='Managed Hosting Badge'] { display: none !important; } div[data-testid='stStatusWidget'] { display: none !important; } [data-testid='stDecoration'] { display: none !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } .stAlert { margin-left: auto !important; margin-right: auto !important; } </style>", unsafe_allow_html=True)
 
 # Lokacija fajla koji glumi bazu podataka
 FAJL_BAZE = "baza_stanja.json"
@@ -177,7 +99,6 @@ if db["slobodan"]:
 # EKRAN 2: PUNJAČ JE ZAUZET (Prikazuje se Tajmer, Lista i Forma za red)
 # ----------------------------------------------------
 else:
-    # 1. Prikaz i računanje tajmera
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]
     ukupno_sekundi = int(proteklo.total_seconds())
@@ -186,7 +107,7 @@ else:
     vreme_prikaz = f"{sati}h {minuti}min" if sati > 0 else f"{minuti} min"
     
     status_linija_html = f"""
-    <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 94%; margin-left: auto; margin-right: auto;">
+    <div style="background-color: rgba(0, 122, 255, 0.08); border: 1px solid rgba(0, 122, 255, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; margin-left: auto; margin-right: auto;">
         <div style="font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 4px;">
             <span>⏱️</span>
             <span><strong style="color: #ffffff;">{db['korisnik']}</strong> puni već <strong style="color: #007AFF; font-size: 18px; font-weight: 900; background-color: rgba(0, 122, 255, 0.15); padding: 2px 6px; border-radius: 4px;">{vreme_prikaz}</strong></span>
@@ -199,7 +120,6 @@ else:
     if ukupno_sekundi >= 3600:
         st.error("⏰ Isteklo je sat vremena punjenja!")
         
-    # 2. Dugme za oslobađanje punjača
     if st.button("Završi punjenje (Oslobodi punjač)", use_container_width=True, key="kljuc_Zavrsi_dugme"):
         if db["red"]:
             db["korisnik"] = db["red"].pop(0)
@@ -211,8 +131,26 @@ else:
         sacuvaj_bazu(db)
         st.rerun()
 
-    # 3. Naslov liste čekanja
     broj_u_redu = len(db["red"])
     st.markdown(f"""
-    <div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px; width: 94%; margin-left: auto; margin-right: auto;">
+    <div style="border: 1px solid #2a2a30; border-radius: 10px; padding: 10px; background-color: #1a1a1e; margin-top: 6px; margin-bottom: 6px; margin-left: auto; margin-right: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 14px; font-weight: bold; color: #ffffff;">📋 Lista čekanja</span>
+            <span style="background-color: rgba(0, 122, 255, 0.15); color: #007AFF; padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 11px;">{broj_u_redu}</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if broj_u_redu == 0:
+        st.markdown("<div style='text-align: center; padding: 6px 10px; background: #1a1a1e; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #64748b; margin-left: auto; margin-right: auto;'>Nema ljudi u redu</div>", unsafe_allow_html=True)
+    else:
+        imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])
+        st.markdown(f"<div style='text-align: center; padding: 6px 10px; background: #1a1a1e; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #e2e8f0; margin-left: auto; margin-right: auto;'>{imena_u_redu}</div>", unsafe_allow_html=True)
+
+    st.write("")
+    ime_za_listu = st.text_input("Tvoje ime za listu", placeholder="Unesi ime za red...", key="kljuc_lista_input", label_visibility="collapsed")
+    if st.button("+ Pridruži se redu", use_container_width=True, key="kljuc_lista_dugme"):
+        if ime_za_listu.strip() != "":
+            db["red"].append(ime_za_listu)
+            sacuvaj_bazu(db)
+            st.rerun()

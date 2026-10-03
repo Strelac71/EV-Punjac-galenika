@@ -2,7 +2,6 @@ import streamlit as st
 import datetime
 import json
 import os
-import time
 
 # Podešavanje stranice - uklanjanje nepotrebnih margina
 st.set_page_config(
@@ -11,15 +10,23 @@ st.set_page_config(
     layout="centered"
 )
 
-# AUTOMATSKO OSVEŽAVANJE CELE APLIKACIJE SVAKIH 30 SEKUNDI
-# Čist Streamlit mehanizam koji tera aplikaciju da sama povuče novo stanje iz baze
-if "poslednje_osvezenje" not in st.session_state:
-    st.session_state.poslednje_osvezenje = time.time()
-
-# Okidač koji na svakih 30 sekundi osvežava ekran za komšije u Viber grupi
-if time.time() - st.session_state.poslednje_osvezenje > 30:
-    st.session_state.poslednje_osvezenje = time.time()
-    st.rerun()
+# NEVIDLJIVI AUTOMATSKI OSVEŽIVAČ (JavaScript okidač na 30 sekundi)
+# Ovaj kod tera pretraživač na telefonu da sam osveži aplikaciju i povuče nove informacije iz grupe
+st.html("""
+    <script>
+        const osvezi = () => {
+            const dugmad = window.parent.document.querySelectorAll('button');
+            if (dugmad.length > 0) {
+                // Simulira blagi interni reload unutar same Streamlit aplikacije
+                window.parent.location.reload();
+            }
+        };
+        if (!window.autoRefreshSet) {
+            window.autoRefreshSet = true;
+            setInterval(osvezi, 30000); // 30000 milisekundi = 30 sekundi
+        }
+    </script>
+""")
 
 # Injektovanje ultra-kompaktnog i sigurnog CSS-a za izgled (Dark Mode)
 st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } </style>", unsafe_allow_html=True)

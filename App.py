@@ -164,7 +164,7 @@ if db["slobodan"]:
         else:
             st.warning("Unesite ime pre čekiranja.")
 else:
-    # SUŽENI I OPTIMIZOVANI TAJMER SA POVEĆANIM VREMENOM PUNJENJA
+    # TAJMER SA POVEĆANIM VREMENOM PUNJENJA
     @st.fragment(run_every="30s")
     def prikazi_tajmer():
         vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")

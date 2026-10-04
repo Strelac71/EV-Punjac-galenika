@@ -3,30 +3,28 @@ import datetime
 import json
 import os
 
-# Podešavanje stranice - uklanjanje nepotrebnih margina
+# Podešavanje stranice - Uklanjanje nepotrebnih margina
 st.set_page_config(
     page_title="EV Punjač - Galenika", 
     page_icon="⚡", 
     layout="centered"
 )
 
-# NEVIDLJIVI AUTOMATSKI OSVEŽIVAČ (JavaScript okidač na 30 sekundi)
-# Ovaj kod tera pretraživač na telefonu da sam osveži aplikaciju i povuče nove informacije iz grupe
-st.html("""
-    <script>
-        const osvezi = () => {
-            const dugmad = window.parent.document.querySelectorAll('button');
-            if (dugmad.length > 0) {
-                // Simulira blagi interni reload unutar same Streamlit aplikacije
-                window.parent.location.reload();
-            }
-        };
-        if (!window.autoRefreshSet) {
-            window.autoRefreshSet = true;
-            setInterval(osvezi, 30000); // 30000 milisekundi = 30 sekundi
-        }
-    </script>
-""")
+# ------------------------------------------------------------------------
+# 100% SIGURAN AUTOMATSKI OSVEŽIVAČ (Čist Streamlit kod bez JavaScript-a)
+# Pokreće osvežavanje cele stranice na svakih 30 sekundi bez obzira na status
+# ------------------------------------------------------------------------
+if "brojac_osvezavanja" not in st.session_state:
+    st.session_state.brojac_osvezavanja = 0
+
+# Streamlit fragment koji radi u pozadini i tera celu aplikaciju na reload
+@st.fragment(run_every="30s")
+def pokretac_auto_refresha():
+    st.session_state.brojac_osvezavanja += 1
+    st.rerun()
+
+# Pokretanje skrivenog osveživača
+pokretac_auto_refresha()
 
 # Injektovanje ultra-kompaktnog i sigurnog CSS-a za izgled (Dark Mode)
 st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } </style>", unsafe_allow_html=True)

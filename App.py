@@ -26,6 +26,7 @@ def ucitaj_i_osiguraj_bazu():
     try:
         with open(FAJL_BAZE, "r") as f:
             d = json.load(f)
+            # Ako je vreme u bazi u starom pogrešnom formatu, automatski ga čistimo da ne pukne sajt
             if d.get("vreme_pocetka") and ":" in d["vreme_pocetka"] and "-" not in d["vreme_pocetka"]:
                 d["vreme_pocetka"] = ""
                 d["slobodan"] = True
@@ -43,13 +44,8 @@ if "db" not in st.session_state:
 
 db = st.session_state.db
 
-# PRIKAZ LOGOTIPA PREKO STABILNOG I PROVERENOG PNG LINKA
-col1, col2, col3 = st.columns([1, 0.35, 1])
-with col2:
-    st.image("https://wikimedia.org", use_container_width=True)
-
 # GLAVNI NASLOV
-st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 20px; font-weight: 800; margin-top: 5px; margin-bottom: 0;'>⚡ EV Punjač</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 0;'>⚡ EV Punjač</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 13px; margin-top: 0; margin-bottom: 2px;'>Lidl Galenika</p>", unsafe_allow_html=True)
 st.markdown("<div style='text-align: center; margin-bottom: 10px;'><span style='display: inline-block; background-color: rgba(57, 211, 83, 0.1); color: #39d353; border: 1px solid rgba(57, 211, 83, 0.3); padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 10px;'>✓ Online</span></div>", unsafe_allow_html=True)
 

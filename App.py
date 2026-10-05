@@ -3,18 +3,12 @@ import datetime
 import json
 import os
 
-# Podešavanje stranice - uklanjanje nepotrebnih margina
+# Podešavanje stranice
 st.set_page_config(
     page_title="EV Punjač - Galenika", 
     page_icon="⚡", 
     layout="centered"
 )
-
-# ------------------------------------------------------------------------
-# NAJSIGURNIJI AUTOMATSKI OSVEŽIVAČ (Čist HTML okidač na 30 sekundi)
-# Bezbedno osvežava celu aplikaciju i garantovano ne može da je sruši
-# ------------------------------------------------------------------------
-st.markdown("<meta http-equiv='refresh' content='30'>", unsafe_allow_html=True)
 
 # Injektovanje ultra-kompaktnog i sigurnog CSS-a za izgled (Dark Mode)
 st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } </style>", unsafe_allow_html=True)
@@ -44,7 +38,7 @@ def sacuvaj_bazu(d):
     kopija = d.copy()
     if kopija.get("vreme_pocetka"):
         if isinstance(kopija["vreme_pocetka"], datetime.datetime):
-            kopija["vreme_pocetka"] = kopija["vreme_pocetka"].replace(tzinfo=None).isoformat()
+            kopija["vreme_pocetka"] = kopija["vreek_pocetka"].replace(tzinfo=None).isoformat()
     with open(FAJL_BAZE, "w") as f:
         json.dump(kopija, f)
 

@@ -3,16 +3,15 @@ import datetime
 import json
 import os
 
-# Podešavanje stranice - ČISTO UKLANJANJE MENIJA I MARGINA PREKO PODRAZUMEVANIH PODEŠAVANJA
+# Podešavanje stranice - Osnovna struktura
 st.set_page_config(
     page_title="EV Punjač - Galenika", 
     page_icon="⚡", 
-    layout="centered",
-    initial_sidebar_state="collapsed"
+    layout="centered"
 )
 
-# Injektovanje ultra-kompaktnog i sigurnog CSS-a bez znakova procenta
-st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stHeader'] { display: none !important; } footer { display: none !important; } .viewerBadge { display: none !important; } .stAppDeployButton { display: none !important; } iframe[title='Managed Hosting Badge'] { display: none !important; } div[data-testid='stStatusWidget'] { display: none !important; } [data-testid='stDecoration'] { display: none !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } .stAlert { margin-left: auto !important; margin-right: auto !important; } </style>", unsafe_allow_html=True)
+# Injektovanje ultra-kompaktnog i sigurnog CSS-a za izgled (Dark Mode)
+st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } </style>", unsafe_allow_html=True)
 
 # Lokacija fajla koji glumi bazu podataka
 FAJL_BAZE = "baza_stanja.json"
@@ -78,9 +77,7 @@ punjac_html = f"""
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
 
-# ----------------------------------------------------
-# EKRAN 1: PUNJAČ JE SLOBODAN (Prikazuje se samo Check-in)
-# ----------------------------------------------------
+# EKRAN A: SLOBODAN PUNJAČ
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
     ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="kljuc_checkin_input")
@@ -95,9 +92,7 @@ if db["slobodan"]:
         else:
             st.warning("Unesite ime pre čekiranja.")
 
-# ----------------------------------------------------
-# EKRAN 2: PUNJAČ JE ZAUZET (Prikazuje se Tajmer, Lista i Forma za red)
-# ----------------------------------------------------
+# EKRAN B: ZAUZET PUNJAČ
 else:
     vreme_kacenja = db["vreme_pocetka"].strftime("%H:%M")
     proteklo = nase_trenutno_vreme() - db["vreme_pocetka"]

@@ -3,14 +3,22 @@ import datetime
 import json
 import os
 
-# 1. Podešavanje stranice i automatsko sakrivanje menija kroz sistemska podešavanja
+# 1. Podešavanje stranice
 st.set_page_config(
     page_title="EV Punjač - Galenika", 
     page_icon="⚡", 
     layout="centered"
 )
 
-# Sakrivanje preostalih Streamlit sistemskih menija i dugmeta "Manage app" preko čistog CSS-a
+# 2. POTPUNO BEZBEDAN AUTOMATSKI OSVEŽIVAČ NA 1 MINUT (60 SEKUNDI)
+# Pokreće osvežavanje u pozadini bez blokiranja servera
+@st.fragment(run_every="60s")
+def auto_osvezavanje_stranice():
+    st.rerun()
+
+auto_osvezavanje_stranice()
+
+# 3. Kompaktan CSS za Dark Mode i sakrivanje menija
 st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stHeader'] { display: none !important; } footer { display: none !important; } .viewerBadge { display: none !important; } .stAppDeployButton { display: none !important; } iframe[title='Managed Hosting Badge'] { display: none !important; } div[data-testid='stStatusWidget'] { display: none !important; } [data-testid='stDecoration'] { display: none !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } div.element-container:has(button:contains('Odustani od čekanja')) button { background-color: #e11d48 !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } </style>", unsafe_allow_html=True)
 
 FAJL_BAZE = "baza_stanja.json"
@@ -18,7 +26,6 @@ FAJL_BAZE = "baza_stanja.json"
 def nase_trenutno_vreme():
     return datetime.datetime.utcnow() + datetime.timedelta(hours=2)
 
-# Funkcija koja sama proverava ispravnost baze i popravlja je ako ima starih formata vremena
 def ucitaj_i_osiguraj_bazu():
     fabricko_stanje = {"slobodan": True, "korisnik": "", "vreme_pocetka": "", "red": []}
     if not os.path.exists(FAJL_BAZE):
@@ -26,7 +33,6 @@ def ucitaj_i_osiguraj_bazu():
     try:
         with open(FAJL_BAZE, "r") as f:
             d = json.load(f)
-            # Ako je vreme u bazi u starom pogrešnom formatu, automatski ga čistimo da ne pukne sajt
             if d.get("vreme_pocetka") and ":" in d["vreme_pocetka"] and "-" not in d["vreme_pocetka"]:
                 d["vreme_pocetka"] = ""
                 d["slobodan"] = True
@@ -54,7 +60,7 @@ if db["slobodan"]:
 else:
     status_tekst, status_boja, status_bg = f"Zauzet ({db['korisnik']})", "#ff453a", "rgba(255, 69, 58, 0.1)"
 
-# KARTICA SA STATUSOM PUNJAČA
+# KARTICA PUNJAČA
 punjac_html = f"""
 <div style="border: 1px solid #2a2a30; border-radius: 12px; padding: 12px; background-color: #1a1a1e; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -71,7 +77,7 @@ punjac_html = f"""
 """
 st.markdown(punjac_html, unsafe_allow_html=True)
 
-# EKRAN KADA JE PUNJAČ SLOBODAN
+# EKRAN A: SLOBODAN PUNJAČ
 if db["slobodan"]:
     st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 2px; text-align: center;'>UKUCAJ SVOJE IME ZA CHECK-IN:</p>", unsafe_allow_html=True)
     ime_korisnika = st.text_input("Ime", placeholder="Tvoje ime...", label_visibility="collapsed", key="kljuc_checkin_input")
@@ -86,7 +92,7 @@ if db["slobodan"]:
         else:
             st.warning("Unesite ime pre čekiranja.")
 
-# EKRAN KADA JE PUNJAČ ZAUZET
+# EKRAN B: ZAUZET PUNJAČ
 else:
     vreme_prikaz = "0 min"
     sat_kacenja = "--:--"

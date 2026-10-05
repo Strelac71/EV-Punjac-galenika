@@ -10,54 +10,8 @@ st.set_page_config(
     layout="centered"
 )
 
-# Lidl Logo pretvoren u Base64 da se uvek sigurno učita bez spoljnih linkova
-LIDL_LOGO_BASE64 = (
-    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAw"
-    "MC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0"
-    "iMTkuNSIgZmlsbD0iIzAwMmQ3MiIgc3Ryb2tlPSIjZmZmMjAwIi8+PHBhdGggZD0iTTkuNi"
-    "AyNy40aDIuNlYxNWgtMi42em01LjQtMTIuNGgyLjd2OS44aDMuNnYyLjNoLTYuM3ptOC4zI"
-    "DBoNC44YzIuNyAwIDQuNiAxLjYgNC42IDQuM3MtMS45IDQuMy00LjYgNC4zaC0yMXptMi43"
-    "IDYuNWgyLjFjMS4xIDAgMi0uNyAyLTEuOHMtOS0xLjgtMi0xLjhocjIuMXptMTMuNCA1LjI"
-    "bLS42LTEuN0g0Ni41bC0uNiAxLjdoLTIuN2wzLjMtOS40aDIuOGwzLjMgOS40em0tMi4yLT"
-    "YuOGwtMS0zLjEtMSAzLjF6IiBmaWxsPSIjZmZmMjAwIi8+PHBhdGggZD0iTTIwIC41QzkuM"
-    "i41LjUgOS4yLjUgMjBzOC43IDE5LjUgMTkuNSAxOS41UzM5LjUgMzAuOCAzOS41IDIwIDI5"
-    "LjggLjUgMjAuNXptMCAzNmMtOS4xIDAtMTYuNS03LjQtMTYuNS0xNi41UzEwLjkgMy41ID"
-    "IwIDMuNXMxNi41IDcuNCAxNi41IDE2LjUtNy40IDE2LjUtMTYuNSAxNi41eiIgZmlsbD0iI"
-    "2RjMzU0NSIvPjwvc3ZnPg=="
-)
-
 # Sakrivanje preostalih Streamlit sistemskih menija i dugmeta "Manage app" preko čistog CSS-a
-st.markdown("""
-<style> 
-    .stApp { background-color: #121214 !important; color: #ffffff !important; } 
-    [data-testid='stHeader'] { display: none !important; } 
-    footer { display: none !important; } 
-    .viewerBadge { display: none !important; } 
-    .stAppDeployButton { display: none !important; } 
-    iframe[title='Managed Hosting Badge'] { display: none !important; } 
-    div[data-testid='stStatusWidget'] { display: none !important; } 
-    [data-testid='stDecoration'] { display: none !important; } 
-    [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } 
-    
-    /* Centriranje i veličina logotipa na vrhu */
-    .logo-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: -10px;
-        margin-bottom: 10px;
-    }
-    .logo-container img {
-        width: 65px !important;
-        height: 65px !important;
-    }
-
-    .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } 
-    div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } 
-    div.element-container:has(button:contains('Odustani od čekanja')) button { background-color: #e11d48 !important; } 
-    .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } 
-</style>
-""", unsafe_allow_html=True)
+st.markdown("<style> .stApp { background-color: #121214 !important; color: #ffffff !important; } [data-testid='stHeader'] { display: none !important; } footer { display: none !important; } .viewerBadge { display: none !important; } .stAppDeployButton { display: none !important; } iframe[title='Managed Hosting Badge'] { display: none !important; } div[data-testid='stStatusWidget'] { display: none !important; } [data-testid='stDecoration'] { display: none !important; } [data-testid='stMarkdownContainer'] p { color: #e2e8f0 !important; margin-bottom: 4px !important; } .stButton > button { background-color: #007AFF !important; color: white !important; height: 38px !important; padding: 0px 10px !important; font-size: 13px !important; font-weight: bold !important; border-radius: 8px !important; border: none !important; margin-top: 2px !important; margin-bottom: 2px !important; display: block !important; margin-left: auto !important; margin-right: auto !important; } div.element-container:has(button:contains('Završi punjenje')) button { background-color: #ff453a !important; } div.element-container:has(button:contains('Odustani od čekanja')) button { background-color: #e11d48 !important; } .stTextInput input { background-color: #1a1a1e !important; color: white !important; border: 1px solid #2a2a30 !important; border-radius: 6px !important; height: 36px !important; font-size: 13px !important; } </style>", unsafe_allow_html=True)
 
 FAJL_BAZE = "baza_stanja.json"
 
@@ -72,7 +26,6 @@ def ucitaj_i_osiguraj_bazu():
     try:
         with open(FAJL_BAZE, "r") as f:
             d = json.load(f)
-            # Ako je vreme u bazi u starom pogrešnom formatu, automatski ga čistimo da ne pukne sajt
             if d.get("vreme_pocetka") and ":" in d["vreme_pocetka"] and "-" not in d["vreme_pocetka"]:
                 d["vreme_pocetka"] = ""
                 d["slobodan"] = True
@@ -90,11 +43,13 @@ if "db" not in st.session_state:
 
 db = st.session_state.db
 
-# PRIKAZ LOGOTIPA NA SAMOM VRHU
-st.markdown(f'<div class="logo-container"><img src="{LIDL_LOGO_BASE64}"></div>', unsafe_allow_html=True)
+# PRIKAZ LOGOTIPA PREKO STABILNOG I PROVERENOG PNG LINKA
+col1, col2, col3 = st.columns([1, 0.35, 1])
+with col2:
+    st.image("https://wikimedia.org", use_container_width=True)
 
 # GLAVNI NASLOV
-st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 0;'>⚡ EV Punjač</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #ffffff; font-size: 20px; font-weight: 800; margin-top: 5px; margin-bottom: 0;'>⚡ EV Punjač</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 13px; margin-top: 0; margin-bottom: 2px;'>Lidl Galenika</p>", unsafe_allow_html=True)
 st.markdown("<div style='text-align: center; margin-bottom: 10px;'><span style='display: inline-block; background-color: rgba(57, 211, 83, 0.1); color: #39d353; border: 1px solid rgba(57, 211, 83, 0.3); padding: 1px 8px; border-radius: 20px; font-weight: bold; font-size: 10px;'>✓ Online</span></div>", unsafe_allow_html=True)
 
@@ -189,3 +144,27 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 if broj_u_redu == 0:
+    st.markdown("<p style='color: #70757A; text-align: center; font-size: 12px; margin-top: 5px; margin-bottom: 10px;'>Nema ljudi u redu</p>", unsafe_allow_html=True)
+else:
+    za_prikaz_reda = ""
+    for i, osoba in enumerate(db["red"], 1):
+        za_prikaz_reda += f"<div style='padding: 4px 8px; background: #222226; border-radius: 6px; margin-bottom: 4px; font-size: 13px;'>{i}. <b>{osoba}</b></div>"
+    st.markdown(za_prikaz_reda, unsafe_allow_html=True)
+
+# Polje za unos na dnu aplikacije
+st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94a3b8; margin-top: 6px; margin-bottom: 2px;'>DODAJ ILI OBRIŠI SEBE IZ REDA:</p>", unsafe_allow_html=True)
+ime_red = st.text_input("Ime za red", placeholder="Ukucaj ime za red ili brisanje...", label_visibility="collapsed", key="kljuc_red_input")
+
+if ime_red:
+    ime_cisto = ime_red.strip()
+    if ime_cisto:
+        if ime_cisto in db["red"]:
+            db["red"].remove(ime_cisto)
+            sacuvaj_bazu(db)
+            st.rerun()
+        elif db["korisnik"] == ime_cisto:
+            st.error("Već koristiš punjač!")
+        else:
+            db["red"].append(ime_cisto)
+            sacuvaj_bazu(db)
+            st.rerun()

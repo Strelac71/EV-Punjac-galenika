@@ -69,7 +69,6 @@ if db["slobodan"]:
         if ime_korisnika.strip() != "":
             db["slobodan"] = False
             db["korisnik"] = ime_korisnika
-            # Automatsko uzimanje našeg lokalnog vremena za upis (npr. 14:35)
             sada = datetime.datetime.utcnow() + datetime.timedelta(hours=2)
             db["vreme_pocetka"] = sada.strftime("%H:%M")
             sacuvaj_bazu(db)

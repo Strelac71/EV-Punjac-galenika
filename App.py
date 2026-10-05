@@ -118,7 +118,6 @@ else:
     imena_u_redu = ", ".join([f"<b>{i+1}.</b> {ime}" for i, ime in enumerate(db["red"])])
     st.markdown(f"<div style='text-align: center; padding: 6px 10px; background: #1a1a1e; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #e2e8f0; margin-left: auto; margin-right: auto;'>{imena_u_redu}</div>", unsafe_allow_html=True)
 
-# UPIS U RED ŠANSU
 st.write("")
 ime_za_listu = st.text_input("Tvoje ime za listu", placeholder="Unesi ime za red...", key="kljuc_lista_input", label_visibility="collapsed")
 if st.button("+ Pridruži se redu", use_container_width=True, key="kljuc_lista_dugme"):

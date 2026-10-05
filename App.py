@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 
-# Podešavanje stranice
+# Podešavanje stranice - Osnovna struktura
 st.set_page_config(
     page_title="EV Punjač - Galenika", 
     page_icon="⚡", 

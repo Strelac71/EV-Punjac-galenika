@@ -38,7 +38,7 @@ def sacuvaj_bazu(d):
     kopija = d.copy()
     if kopija.get("vreme_pocetka"):
         if isinstance(kopija["vreme_pocetka"], datetime.datetime):
-            kopija["vreme_pocetka"] = kopija["vreek_pocetka"].replace(tzinfo=None).isoformat()
+            kopija["vreme_pocetka"] = kopija["vreme_pocetka"].replace(tzinfo=None).isoformat()
     with open(FAJL_BAZE, "w") as f:
         json.dump(kopija, f)
 
